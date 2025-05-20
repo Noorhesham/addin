@@ -41,7 +41,7 @@ const ChatInterface = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-white h-44 w-full absolute top-10 z-40 left-0 w-full overflow-y-scroll shadow-md overflow-hidden"
+            className="bg-white h-44 w-full absolute top-10 z-40 left-0 overflow-y-scroll shadow-md overflow-hidden"
           >
             <div className="p-3">
               {navLinks.map((link, index) => (
