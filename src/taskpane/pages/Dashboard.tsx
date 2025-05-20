@@ -30,9 +30,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         </div>
       </header>
 
-      {/* Main content */}
       <main className="flex-1 overflow-hidden p-3">
-        <div className="h-full rounded-md overflow-hidden shadow-sm border h-[80vh] border-rose-100">
+        <div className=" rounded-md overflow-hidden shadow-sm border h-[80vh] border-rose-100">
           <ChatInterface />
         </div>
       </main>
