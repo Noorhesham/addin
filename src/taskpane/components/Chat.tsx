@@ -52,14 +52,14 @@ const ChatInterface = ({ onLogout }: { onLogout: () => void }) => {
     <div className="h-screen flex flex-col bg-rose-50">
       {/* Animated Sidebar */}
       <div onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between">
-        <Logo />
-        <button
+        {/* <Logo /> */}
+        {/* <button
           className="rounded-md py-1 px-2"
           style={{ backgroundColor: "#FF0000", color: "white" }}
           onClick={handleLogout}
         >
           Logout
-        </button>
+        </button> */}
       </div>
       <AnimatePresence>
         {isOpen && (
