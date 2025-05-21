@@ -7,6 +7,22 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 
+// Helper to safely access Office object
+const updateOfficeSettings = (isLoggedIn: boolean) => {
+  try {
+    // @ts-ignore - Office is available at runtime but TypeScript doesn't know about it
+    if (typeof Office !== "undefined" && Office?.context?.document?.settings) {
+      // @ts-ignore
+      Office.context.document.settings.set("isLoggedIn", isLoggedIn);
+      // @ts-ignore
+      Office.context.document.settings.saveAsync();
+    }
+  } catch (error) {
+    console.error("Error updating Office settings:", error);
+  }
+};
+
+// Define schema for form validation
 const loginSchema = z.object({
   email: z
     .string()
@@ -35,15 +51,25 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
+    // Simulate login - in a real app, you would call your authentication API
     console.log("Login attempt with:", data);
 
+    // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
+    // Store login state in localStorage
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userEmail", data.email);
+
+    // Notify Word add-in that user is logged in
+    updateOfficeSettings(true);
+
+    // Navigate to dashboard
     onLogin();
   };
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-rose-50 p-4">
+    <div className="h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
         <div className="flex flex-col items-center space-y-2 mb-6">
           <Logo />
@@ -59,27 +85,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           </div>
 
           <div className="space-y-2">
-            {/* <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <a
-                href="#"
-                className="text-xs text-blue-600 hover:underline"
-                onClick={(e) => e.preventDefault()}
-              >
-                Forgot password?
-              </a>
-            </div> */}
+            <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" placeholder="••••••••" {...register("password")} />
             {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
           </div>
 
-          <Button
+          <button
+            style={{ backgroundColor: "#FF0000", color: "white" }}
             type="submit"
-            className="w-full bg-rose-600 hover:bg-rose-700"
+            className="w-full rounded-md py-3 px-6"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Signing in..." : "Sign in"}
-          </Button>
+          </button>
         </form>
 
         {/* <div className="mt-6 text-center text-sm">

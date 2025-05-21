@@ -3,17 +3,41 @@ import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import Logo from "./Logo";
 
+// Helper to safely access Office object
+const updateOfficeSettings = (isLoggedIn: boolean) => {
+  try {
+    // @ts-ignore - Office is available at runtime but TypeScript doesn't know about it
+    if (typeof Office !== "undefined" && Office?.context?.document?.settings) {
+      // @ts-ignore
+      Office.context.document.settings.set("isLoggedIn", isLoggedIn);
+      // @ts-ignore
+      Office.context.document.settings.saveAsync();
+    }
+  } catch (error) {
+    console.error("Error updating Office settings:", error);
+  }
+};
+
 const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
-
   const [currentPage, setCurrentPage] = useState<"login" | "dashboard">("login");
 
   const navigate = (page: "login" | "dashboard") => {
     setCurrentPage(page);
   };
 
+  // Check login state when app loads
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Check if user is already logged in
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      if (isLoggedIn) {
+        setCurrentPage("dashboard");
+
+        // Make sure Word ribbon is updated
+        updateOfficeSettings(true);
+      }
+
       setIsLoading(false);
     }, 2000);
 

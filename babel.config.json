@@ -5,9 +5,13 @@
       {
         "targets": {
           "esmodules": false
-        }
+        },
+        "useBuiltIns": "entry",
+        "corejs": "3.0.0"
       }
     ],
-    "@babel/preset-typescript"
-  ]
+    "@babel/preset-typescript",
+    "@babel/preset-react"
+  ],
+  "plugins": ["@babel/plugin-transform-runtime", "@babel/plugin-proposal-class-properties"]
 }

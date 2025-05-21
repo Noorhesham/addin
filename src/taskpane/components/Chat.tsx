@@ -1,8 +1,25 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import React from "react";
+import Logo from "./Logo";
+import { Button } from "./ui/button";
 
-const ChatInterface = () => {
+// Helper to safely access Office object
+const updateOfficeSettings = (isLoggedIn: boolean) => {
+  try {
+    // @ts-ignore - Office is available at runtime but TypeScript doesn't know about it
+    if (typeof Office !== "undefined" && Office?.context?.document?.settings) {
+      // @ts-ignore
+      Office.context.document.settings.set("isLoggedIn", isLoggedIn);
+      // @ts-ignore
+      Office.context.document.settings.saveAsync();
+    }
+  } catch (error) {
+    console.error("Error updating Office settings:", error);
+  }
+};
+
+const ChatInterface = ({ onLogout }: { onLogout: () => void }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -13,6 +30,18 @@ const ChatInterface = () => {
     { name: "Insights", action: "View Insights" },
   ];
 
+  const handleLogout = () => {
+    // Clear localStorage
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userEmail");
+
+    // Notify Word add-in that user is logged out
+    updateOfficeSettings(false);
+
+    // Call the parent's onLogout function
+    onLogout();
+  };
+
   const sendMessage = () => {
     // Add your send logic here
     console.log("Sending:", message);
@@ -20,90 +49,78 @@ const ChatInterface = () => {
   };
 
   return (
-    <div style={{ height: "80vh" }} className="flex relative flex-col">
-      <motion.nav
-        className="bg-rose-700 py-3 px-4 cursor-pointer rounded-t-md shadow-sm flex items-center"
-        onClick={() => setIsOpen(!isOpen)}
-        initial={false}
-        animate={{ backgroundColor: isOpen ? "#be123c" : "#e11d48" }}
-      >
-        <span className="text-white font-semibold text-lg">Bridge</span>
-        <div className="ml-auto">
-          <motion.span className="text-white" animate={{ rotate: isOpen ? 180 : 0 }}>
-            {isOpen ? "▲" : "▼"}
-          </motion.span>
-        </div>
-      </motion.nav>
-
+    <div className="h-screen flex flex-col bg-rose-50">
+      {/* Animated Sidebar */}
+      <div onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between">
+        <Logo />
+        <button
+          className="rounded-md py-1 px-2"
+          style={{ backgroundColor: "#FF0000", color: "white" }}
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+      </div>
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-white h-44 w-full absolute top-10 z-40 left-0 overflow-y-scroll shadow-md overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-white shadow-lg p-4"
           >
-            <div className="p-3">
-              {navLinks.map((link, index) => (
-                <motion.a
-                  key={link.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="block p-3 hover:bg-rose-50 rounded-lg transition-colors text-rose-800 mb-2 cursor-pointer flex items-center"
-                >
-                  <span className="font-medium">{link.name}</span>
-                  <span className="ml-2 text-xs text-rose-600 opacity-80">- {link.action}</span>
-                </motion.a>
-              ))}
-            </div>
+            {navLinks.map((link, index) => (
+              <motion.a
+                key={link.name}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="block p-2 hover:bg-rose-50 rounded-lg transition-colors text-rose-800 mb-2 cursor-pointer"
+              >
+                {link.name} - {link.action}
+              </motion.a>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div
-        style={{ height: "90%" }}
-        className="flex-1 overflow-y-auto p-4 space-y-4 bg-rose-50 min-h-[200px]"
-      >
-        <div className="flex justify-center items-center h-full opacity-60">
-          <p className="text-rose-800 text-sm">Your conversation will appear here</p>
-        </div>
+      {/* Chat Area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-rose-50">
+        {/* Add your chat messages here */}
       </div>
 
-      <div className="border-t border-rose-100 flex flex-col p-4 h-full bg-white rounded-b-md shadow-sm">
-        <div className="flex flex-col mt-auto">
-          <div className="flex items-center space-x-3">
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Ask a question about your document..."
-              className="flex-1 p-2.5 border border-rose-200 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-500 bg-rose-50/30 text-sm"
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-            />
-            <button
-              onClick={sendMessage}
-              className="p-2.5 bg-rose-600 text-rose-400 rounded-full hover:bg-rose-700 transition-colors flex items-center justify-center"
+      {/* Message Input */}
+      <div className="border-t p-4 bg-white">
+        <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Ask a question about your document..."
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-600"
+            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+          />
+          <button
+            onClick={sendMessage}
+            aria-label="Send message"
+            title="Send message"
+            className="p-2 bg-rose-600 text-rose-500 rounded-lg hover:bg-rose-700 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                />
-              </svg>
-            </button>
-          </div>
-          <p className="text-xs text-gray-500 mt-2 italic text-center">
-            AI-Generated content may be inaccurate and requires human review.
-          </p>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </div>

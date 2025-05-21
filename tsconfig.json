@@ -6,35 +6,35 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
-    "module": "ES2020",
+    "module": "ESNext",
     "moduleResolution": "node",
     "noImplicitReturns": true,
     "noUnusedParameters": true,
     "outDir": "dist",
     "removeComments": false,
     "sourceMap": true,
-    "target": "es5",
-    "lib": [
-      "es7",
-      "dom"
-    ],
+    "target": "ES2015",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strict": false,
     "pretty": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+    "typeRoots": ["node_modules/@types"],
+    "downlevelIteration": true,
+    "noEmitOnError": false
   },
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules", "dist"],
   "compileOnSave": false,
   "buildOnSave": false,
-  "ts-node": { 
+  "ts-node": {
     "compilerOptions": {
-      "module": "commonjs",        "baseUrl": ".",
+      "module": "commonjs",
+      "baseUrl": ".",
       "paths": {
         "@/*": ["./*"]
       }
     },
-    "files": true 
-  }
+    "files": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
